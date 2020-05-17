@@ -1,0 +1,16 @@
+---
+# tasks file for ssh_keypair_role
+
+- name : Generate ssh keypair
+  openssh_keypair:
+    path: "{{ key_folder }}"
+  tags:
+    - wip
+
+- name: Set authorized key taken from file
+  authorized_key:
+    user: "{{ sudo_user }}"
+    state: present
+    key: "{{ key_path }}"
+  tags:
+    - wip

@@ -1,0 +1,23 @@
+---
+# tasks file for dns_role
+
+- name: Uninstall resolvconf
+  apt:
+    name: resolvconf
+    state: absent
+    purge: yes
+  when: ansible_lsb is defined and 'id' in ansible_lsb and ansible_lsb.id == "Ubuntu"
+
+- name: Check for dhclient
+  command: pgrep dhclient
+  register: dhclient
+  failed_when: false
+  changed_when: false
+
+- name: Install resolv.conf
+  template:
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
+    mode: 0444
+    backup: yes
+  when: dhclient.rc == 1

@@ -1,0 +1,13 @@
+---
+# tasks file for networking_role
+- name: bridge-nf-call-iptables in systemctl
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: '1'
+    sysctl_set: yes
+
+- name: Stop firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: False

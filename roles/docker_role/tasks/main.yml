@@ -1,0 +1,76 @@
+---
+# tasks file for docker_role
+
+- name: Upgrade all packages
+  yum: name=* state=latest
+  become: yes
+
+- name: Check if Docker is installed
+  command: systemctl status docker
+  register: docker_check
+  ignore_errors: yes
+
+- name: Remove docker if installed
+  yum:
+    name: "{{ packages }}"
+    state: removed
+  vars:
+    packages:
+      - docker
+      - docker-common
+      - docker-selinux
+      - docker-engine 
+      - docker-ce-cli
+      - docker-ce
+  become: yes
+
+- name: Install yum utils
+  yum:
+    name: yum-utils
+    state: latest
+  become: yes
+
+- name: Install device-mapper-persistent-data
+  yum:
+    name: device-mapper-persistent-data
+    state: latest
+  become: yes
+
+- name: Install lvm2
+  yum:
+    name: lvm2
+    state: latest
+  become: yes
+
+- name: Add Docker repo
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+  become: yes
+
+- name: Install Docker
+  package:
+    name: docker-ce-18.06.1.ce-3.el7
+    state: present
+  become: yes
+
+- name: Start Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Make sure we have a 'docker' group
+  group:
+    name: docker
+    state: present
+  become: yes
+
+- name: Add current user to docker group
+  user:
+    name: "{{ item }}"
+    groups: docker
+    append: yes
+  with_items: "{{ sudo_user }}"
+  become: yes

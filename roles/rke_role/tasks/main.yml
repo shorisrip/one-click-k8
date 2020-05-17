@@ -1,0 +1,39 @@
+---
+# tasks file for rke_role
+
+- name: Install EPEL repo
+  yum:
+     name: epel-release
+     state: present
+
+- name: install the latest version of pip
+  yum:
+    name: python*-pip
+    state: latest
+
+- name: install certain python modules for docker
+  pip:
+    name: docker
+    state: present
+
+
+
+#- name: Pull and run the Rancher/server container
+#  docker_container:
+#      name: "{{ rancher_name }}"
+#      image: rancher/server
+#      restart_policy: always
+#      state: started
+#      ports:
+#        - "{{ rancher_port }}:8080"
+
+#- name: Wait for the Rancher server to start
+#  action: command docker logs {{ rancher_name }}
+#  register: rancher_logs
+#  until: rancher_logs.stdout.find("Listening on") != -1
+#  retries: 30
+#  delay: 10
+
+#- name: Print Rancher's URL
+#  debug: msg="You can connect to rancher server http://{{ ansible_default_ipv4.address }}:{{ rancher_port }}"
+  
