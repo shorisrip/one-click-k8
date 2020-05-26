@@ -59,11 +59,9 @@
   name: Play3
   vars:
     sudo_user: ananya
-    rancher_name: rancher_container
-    rancher_port: 8000
     key_folder: /home/ananya/.ssh/id_rsa
     key_path: /home/ananya/.ssh/id_rsa.pub
   roles:
       - docker_role
-#      - ssh_keypair_role
+      - ssh_keypair_role
       - rke_role
