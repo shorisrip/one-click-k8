@@ -1,6 +1,8 @@
-[nodes]
+[master]
 192.168.100.131
 192.168.100.132
+
+[worker]
 192.168.100.133
 192.168.100.134
 192.168.100.135
@@ -14,3 +16,20 @@
 192.168.100.6
 192.168.100.8
 
+[nodes:children]
+master
+worker
+
+[master:vars]
+user=ananya
+ssh_key_path=/home/ananya/.ssh/id_rsa
+port=22
+
+
+[worker:vars]
+user=ananya
+ssh_key_path=/home/ananya/.ssh/id_rsa
+port=22
+
+[ananya]
+127.0.0.1

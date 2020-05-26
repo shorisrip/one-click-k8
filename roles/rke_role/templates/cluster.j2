@@ -1,0 +1,48 @@
+nodes:
+{% for host in groups['master'] %}
+    - address: {{ host }}
+      user: {{ hostvars[host].user }}
+      role:
+        - controlplane
+        - etcd
+      ssh_key_path: {{ hostvars[host].ssh_key_path }}
+      port: {{ hostvars[host].port }}
+{% endfor %}
+
+
+{% for host in groups['worker'] %}
+    - address: {{ host }}
+      user: {{ hostvars[host].user }}
+      role:
+        - worker
+      ssh_key_path: {{ hostvars[host].ssh_key_path }}
+      port: {{ hostvars[host].port }}
+{% endfor %}
+
+
+services:
+  kube-api:
+    service_cluster_ip_range: {{ rke.services.kube_api.service_cluster_ip_range }}
+    pod_security_policy: {{ rke.services.kube_api.pod_security_policy }}
+    always_pull_images: {{ rke.services.kube_api.always_pull_images }}
+  kube-controller:
+    cluster_cidr: {{ rke.services.kube_controller.cluster_cidr }}
+    service_cluster_ip_range: {{ rke.services.kube_controller.service_cluster_ip_range }}
+  kubelet:
+    cluster_domain: {{ rke.services.kubelet.cluster_domain }}
+    cluster_dns_server: {{ rke.services.kubelet.cluster_dns_server }}
+    fail_swap_on: {{ rke.services.kubelet.fail_swap_on }}
+network:
+  plugin: {{ rke.network.plugin }}
+authentication:
+  strategy: {{ rke.authentication.strategy }}
+ssh_key_path: {{ rke.ssh_key_path }}
+ssh_agent_auth: {{ rke.ssh_agent_auth }}
+authorization:
+  mode: {{ rke.authorization.mode }}
+ignore_docker_version: {{ rke.ignore_docker_version }}
+kubernetes_version: {{ rke.kubernetes_version }}
+cluster_name: {{ rke.cluster_name }}
+restore:
+  restore: {{ rke.restore.restore }}
+  snapshot_name: {{ rke.restore.snapshot_name }}

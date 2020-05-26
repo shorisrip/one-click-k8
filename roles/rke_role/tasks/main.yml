@@ -16,6 +16,25 @@
     name: docker
     state: present
 
+- name: download Rancher rke_linux-amd64 to bin location
+  get_url:
+    url: https://github.com/rancher/rke/releases/download/v0.2.1/rke_linux-amd64
+    dest: /usr/local/bin/rke
+    mode: '0755'
+
+- name: Check if Rancher has been installed
+  command: rke --version
+
+- name: render jinja template to create cluster.yaml
+  template:
+    src: cluster.j2
+    dest: "{ {{ role_path }}/files/ }"
+    mode: '0644'
+
+- name: Check that the config.yml is created
+  stat:
+    path: "{ {{ role_path }}/files/config.yml }"
+  register: stat_result
 
 
 #- name: Pull and run the Rancher/server container
