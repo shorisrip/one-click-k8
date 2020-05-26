@@ -1,17 +1,7 @@
 - hosts:
     - ananya
   name: play1
+  become: true
+  become_user:  kaermorhen
   roles:
     - rke_role
-
-#- hosts:
-#    - ananya
-#  name: play2
-#  tasks:
-#    - name: Print some debug information
-#      vars:
-#        msg: |
-#          hostvars: {{ hostvars[groups['master'][0]] }}
-#      debug:
-#        msg: "{{ msg.split('\n') }}"
-#      tags: debug_info

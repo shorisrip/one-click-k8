@@ -9,7 +9,6 @@ nodes:
       port: {{ hostvars[host].port }}
 {% endfor %}
 
-
 {% for host in groups['worker'] %}
     - address: {{ host }}
       user: {{ hostvars[host].user }}
@@ -18,7 +17,6 @@ nodes:
       ssh_key_path: {{ hostvars[host].ssh_key_path }}
       port: {{ hostvars[host].port }}
 {% endfor %}
-
 
 services:
   kube-api:

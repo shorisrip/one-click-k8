@@ -6,53 +6,56 @@
      name: epel-release
      state: present
 
-- name: install the latest version of pip
+- name: Install the latest version of pip
   yum:
     name: python*-pip
     state: latest
 
-- name: install certain python modules for docker
+- name: Check if docker is installed
   pip:
     name: docker
     state: present
 
-- name: download Rancher rke_linux-amd64 to bin location
+- name: Download Rancher rke_linux-amd64 to bin location
   get_url:
     url: https://github.com/rancher/rke/releases/download/v0.2.1/rke_linux-amd64
     dest: /usr/local/bin/rke
     mode: '0755'
+  register: rke_binary
 
 - name: Check if Rancher has been installed
   command: rke --version
 
-- name: render jinja template to create cluster.yaml
+- name: Create target directory for cluster.yaml
+  file: path="{{ role_path }}/files/" state=directory mode=0777
+
+- name: Render jinja template to create cluster.yaml
   template:
     src: cluster.j2
-    dest: "{ {{ role_path }}/files/ }"
-    mode: '0644'
+    dest: "{{ role_path }}/files/cluster.yaml"
+    mode: '0777'
+  register: rke_cluster_config
 
-- name: Check that the config.yml is created
-  stat:
-    path: "{ {{ role_path }}/files/config.yml }"
-  register: stat_result
+- name: Run RKE installer
+  shell: |
+    rke up | tee /var/log/rke-up.log
+  args:
+    chdir: "{{ role_path }}/files/"
+  when: rke_binary is changed or rke_cluster_config is changed or rke_force_configure
 
+- name: Install kubectl
+  get_url:
+    url: {{ kubectl_url }}
+    dest: /usr/local/bin/kubectl
+    mode: "755"
 
-#- name: Pull and run the Rancher/server container
-#  docker_container:
-#      name: "{{ rancher_name }}"
-#      image: rancher/server
-#      restart_policy: always
-#      state: started
-#      ports:
-#        - "{{ rancher_port }}:8080"
+- name: Ensure $HOME/.kube exists
+  file:
+    path: "{{ ansible_env.HOME }}/.kube"
+    state: directory
 
-#- name: Wait for the Rancher server to start
-#  action: command docker logs {{ rancher_name }}
-#  register: rancher_logs
-#  until: rancher_logs.stdout.find("Listening on") != -1
-#  retries: 30
-#  delay: 10
-
-#- name: Print Rancher's URL
-#  debug: msg="You can connect to rancher server http://{{ ansible_default_ipv4.address }}:{{ rancher_port }}"
-  
+- name: Copy kubeconfig to default location
+  copy:
+    remote_src: yes
+    src: "{{ role_path }}/files/kube_config_cluster.yml"
+    dest: "{{ ansible_env.HOME }}/.kube/config"

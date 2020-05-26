@@ -1,0 +1,67 @@
+nodes:
+    - address: 192.168.100.131
+      user: ananya
+      role:
+        - controlplane
+        - etcd
+      ssh_key_path: /home/ananya/.ssh/id_rsa
+      port: 22
+    - address: 192.168.100.132
+      user: ananya
+      role:
+        - controlplane
+        - etcd
+      ssh_key_path: /home/ananya/.ssh/id_rsa
+      port: 22
+
+    - address: 192.168.100.133
+      user: ananya
+      role:
+        - worker
+      ssh_key_path: /home/ananya/.ssh/id_rsa
+      port: 22
+    - address: 192.168.100.134
+      user: ananya
+      role:
+        - worker
+      ssh_key_path: /home/ananya/.ssh/id_rsa
+      port: 22
+    - address: 192.168.100.135
+      user: ananya
+      role:
+        - worker
+      ssh_key_path: /home/ananya/.ssh/id_rsa
+      port: 22
+    - address: 192.168.100.136
+      user: ananya
+      role:
+        - worker
+      ssh_key_path: /home/ananya/.ssh/id_rsa
+      port: 22
+
+services:
+  kube-api:
+    service_cluster_ip_range: 10.43.0.0/16
+    pod_security_policy: False
+    always_pull_images: False
+  kube-controller:
+    cluster_cidr: 10.42.0.0/16
+    service_cluster_ip_range: 10.43.0.0/16
+  kubelet:
+    cluster_domain: cluster.local
+    cluster_dns_server: 10.43.0.10
+    fail_swap_on: False
+network:
+  plugin: calico
+authentication:
+  strategy: x509
+ssh_key_path: /home/ananya/.ssh/id_rsa
+ssh_agent_auth: False
+authorization:
+  mode: rbac
+ignore_docker_version: False
+kubernetes_version: v1.13.5-rancher1-2
+cluster_name: demo_cluster
+restore:
+  restore: False
+  snapshot_name: 
