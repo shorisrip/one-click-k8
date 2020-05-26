@@ -4,4 +4,4 @@
   become: true
   become_user:  kaermorhen
   roles:
-    - rke_role
+    - helm_role

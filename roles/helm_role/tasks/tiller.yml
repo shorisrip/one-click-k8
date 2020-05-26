@@ -1,0 +1,23 @@
+---
+
+- name: Create serviceaccount
+  shell: kubectl -n kube-system create serviceaccount tiller
+  register: result
+  changed_when: "'created' in result.stdout"
+  failed_when: "result.rc != 0 and 'already exists' not in result.stderr"
+
+- name: create clusterrolebinding
+  shell: kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+  register: result
+  changed_when: "'created' in result.stdout"
+  failed_when: "result.rc != 0 and 'already exists' not in result.stderr"
+
+- name: Helm init
+  shell: helm init --service-account tiller
+
+- name: Helm init
+  shell: kubectl -n kube-system  rollout status deploy/tiller-deploy
+
+- name: Helm init
+  shell: kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+

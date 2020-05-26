@@ -1,0 +1,39 @@
+---
+# tasks file for helm_role
+
+- name: Debug
+  debug: "msg='Variable: {{ helm_download_url.split('/')[-1]  }}'"
+  tags:
+    - debug_info
+
+
+- name: Create target directory for helm packag
+  file:
+    path: "{{ helm_dir }}"
+    state: directory
+    mode: 0777
+
+- name: Download Helm package location
+  get_url:
+    url: "{{ helm_download_url }}"
+    dest: "{{ helm_dir }}/{{ helm_download_url.split('/')[-1] | lower }}"
+    mode: '0755'
+
+- name: Untar helm package
+  unarchive:
+    src: "{{ helm_dir }}/{{ helm_download_url.split('/')[-1] | lower }}"
+    dest: "{{ helm_dir }}"
+
+- name: Copy helm to executable location
+  copy:
+    src: "{{ helm_dir }}/ {{ helm_download_url.split('.')[-3].split('-')[-2:].join('-') | lower }}"
+    dest: /usr/local/bin/helm
+    mode: '0755'
+
+- name: Remove helm file
+  file:
+    path: "{{ helm_dir }}/ {{ helm_download_url.split('.')[-3].split('-')[-2:].join('-') | lower }}"
+    state: absent
+
+- include_tasks: tiller.yml
+
