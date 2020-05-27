@@ -1,5 +1,6 @@
 ---
-- hosts: 
+
+- hosts:
     - nodes
     - rke
   name: play1
@@ -15,7 +16,7 @@
   name:  Play2
   vars:
     resolv_nameservers:
-      - 8.8.8.8    
+      - 8.8.8.8
     sudo_user: ananya
     kernel_modules_for_rke:
       - br_netfilter
@@ -48,7 +49,7 @@
       - xt_recent
       - xt_set
       - xt_statistic
-      - xt_tcpudp 
+      - xt_tcpudp
   roles:
       - dns_role
       - docker_role
@@ -59,9 +60,11 @@
   name: Play3
   vars:
     sudo_user: ananya
-    key_folder: /home/ananya/.ssh/id_rsa
-    key_path: /home/ananya/.ssh/id_rsa.pub
+    key_folder: /home/ananya/.ssh
+    key_name: id_rsa
+    ssh_password_of_nodes: my_password
   roles:
       - docker_role
       - ssh_keypair_role
       - rke_role
+      - helm_role

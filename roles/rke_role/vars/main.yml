@@ -29,3 +29,5 @@ rke:
     snapshot_name: ""
 
 kubectl_url: "https://storage.googleapis.com/kubernetes-release/release/v1.13.5/bin/linux/amd64/kubectl"
+rke_dir: "rke_dir"
+rke_force_configure: false
