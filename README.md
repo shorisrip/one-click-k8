@@ -30,5 +30,8 @@ The VMs must have same password.
 
 # Usage
 -------------------------
-```ansible-playbook setup.yml -i hosts -u root --private-key <key_path> --extra-vars "sudoers=<desired_sudo_user_name> upassword=<desired_password_forsudo_user> ssh_password_of_nodes=<vm_password>" 
---skip-tags "debug_info"```
+
+```
+ansible-playbook setup.yml -i hosts -u root --private-key <key_path> --extra-vars "sudoers=<desired_sudo_user_name> upassword=<desired_password_forsudo_user> ssh_password_of_nodes=<vm_password>" 
+--skip-tags "debug_info"
+``` 
