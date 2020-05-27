@@ -2,4 +2,4 @@
 # vars file for helm_role
 
 helm_download_url: "http://storage.googleapis.com/kubernetes-helm/helm-v2.12.3-linux-amd64.tar.gz"
-helm_dir: "~/helm"
+helm_dir: "helm"
