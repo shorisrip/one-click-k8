@@ -2,7 +2,7 @@
 # tasks file for helm_role
 
 - name: Debug
-  debug: "msg='Variable: {{ helm_download_url.split('/')[-1]  }}'"
+  debug: "msg='Variable: {{ helm_dir }}/{{ helm_download_url.split('.')[-3].split('-')[-2:] | join('-') | lower }}'"
   tags:
     - debug_info
 
@@ -26,13 +26,13 @@
 
 - name: Copy helm to executable location
   copy:
-    src: "{{ helm_dir }}/ {{ helm_download_url.split('.')[-3].split('-')[-2:].join('-') | lower }}"
+    src: "{{ helm_dir }}/{{ helm_download_url.split('.')[-3].split('-')[-2:] | join('-') | lower }}"
     dest: /usr/local/bin/helm
     mode: '0755'
 
 - name: Remove helm file
   file:
-    path: "{{ helm_dir }}/ {{ helm_download_url.split('.')[-3].split('-')[-2:].join('-') | lower }}"
+    path: "{{ helm_dir }}/{{ helm_download_url.split('.')[-3].split('-')[-2:] | join('-') | lower }}"
     state: absent
 
 - include_tasks: tiller.yml
