@@ -3,6 +3,7 @@
  
 * Ensure k8 master and worker vms are created 
 * Ensure k8 master and worker vms have same password
+
 On your local machine, or the ansible host machine:
 * Ensure ssh connectivity to all the target machines
 * ```sudo yum -y install epel-repo```
