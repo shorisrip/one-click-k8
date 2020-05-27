@@ -1,16 +1,25 @@
 ---
 # tasks file for ssh_keypair_role
 
-- name : Generate ssh keypair
-  openssh_keypair:
-    path: "{{ key_folder }}"
-  tags:
-    - wip
+- name: Create target directory for key
+  file: path="{{ key_folder }}" state=directory mode=0700 owner="{{ sudo_user }}" group="{{ sudo_user }}"
 
-- name: Set authorized key taken from file
-  authorized_key:
-    user: "{{ sudo_user }}"
+- name : Generate ssh keypair
+  become_user: "{{ sudo_user }}"
+  openssh_keypair:
+    path: "{{ key_folder }}/{{ key_name }}"
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+
+
+- name: Install sshpass
+  yum:
+    name: sshpass
     state: present
-    key: "{{ key_path }}"
-  tags:
-    - wip
+  become: yes
+
+- name: Copy authorized keys to remote
+  become_user: "{{ sudo_user }}"
+  command: "sshpass -p  {{ ssh_password_of_nodes }} ssh-copy-id -i {{ key_folder }}/{{ key_name }}.pub {{ sudo_user }}@{{ item }} -o StrictHostKeyChecking=no"
+  with_items: "{{ groups['nodes'] }}"
+
