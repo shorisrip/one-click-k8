@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka-zookeeper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      volumes:
+       - name: kafka-zk-data
+         persistentVolumeClaim:
+           claimName: kafka-zk-pv-claim
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: zookeeper
+        image: digitalwonderland/zookeeper
+        ports:
+          - containerPort: 2181
+          - containerPort: 2888
+          - containerPort: 3888
+        volumeMounts:
+        - name: kafka-zk-data
+          mountPath: /bitnami/zookeeper
+        env:
+        - name: ZOOKEEPER_ID
+          value: "1"
+        - name: ZOOKEEPER_SERVER
+          value: zk
+      nodeSelector:
+        name: worker2
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: kafka-zk
+spec:
+  type: LoadBalancer
+  ports:
+  - name: port-2181
+    port: 2181
+    protocol: TCP 
+  - name: port-2888
+    port: 2888
+    protocol: TCP 
+  - name: port-3888
+    port: 3888
+    protocol: TCP 
+  selector:
+    app: zookeeper

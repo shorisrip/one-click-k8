@@ -17,6 +17,7 @@
     state: present
 
 - name: Download Rancher rke_linux-amd64 to bin location
+  become: yes
   get_url:
     url: https://github.com/rancher/rke/releases/download/v0.2.1/rke_linux-amd64
     dest: /usr/local/bin/rke
@@ -25,37 +26,72 @@
 
 - name: Check if Rancher has been installed
   command: rke --version
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
 
 - name: Create target directory for cluster.yaml
-  file: path="{{ role_path }}/files/" state=directory mode=0777
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
+  file: path="/home/{{ sudo_user }}/{{ rke_dir }}" state=directory mode=0777
 
 - name: Render jinja template to create cluster.yaml
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
   template:
     src: cluster.j2
-    dest: "{{ role_path }}/files/cluster.yaml"
+    dest: "/home/{{ sudo_user }}/{{ rke_dir }}/cluster.yml"
     mode: '0777'
   register: rke_cluster_config
 
+- name: Ensure logfile exists
+  become: yes
+  become_method: sudo
+  become_user: "{{ sudo_user }}"
+  file:
+    path: "/home/{{ sudo_user }}/{{ rke_dir }}/rke-up.log"
+    mode: '0777'
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
+    state: touch
+
 - name: Run RKE installer
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
   shell: |
-    rke up | tee /var/log/rke-up.log
+    rke up | tee "/home/{{ sudo_user }}/{{ rke_dir }}/rke-up.log"
   args:
-    chdir: "{{ role_path }}/files/"
+    chdir: "/home/{{ sudo_user }}/{{ rke_dir }}"
   when: rke_binary is changed or rke_cluster_config is changed or rke_force_configure
 
 - name: Install kubectl
+  become: yes
+  become_method: sudo
+  become_user: "{{ sudo_user }}"
   get_url:
     url: "{{ kubectl_url }}"
     dest: /usr/local/bin/kubectl
     mode: "755"
 
-- name: Ensure $HOME/.kube exists
+- name: Ensure .kube exists
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
   file:
-    path: "{{ ansible_env.HOME }}/.kube"
+    path: "/home/{{ sudo_user }}/.kube"
     state: directory
+    mode: '0777'
+    owner: "{{ sudo_user }}"
+    group: "{{ sudo_user }}"
 
 - name: Copy kubeconfig to default location
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
   copy:
     remote_src: yes
-    src: "{{ role_path }}/files/kube_config_cluster.yml"
-    dest: "{{ ansible_env.HOME }}/.kube/config"
+    src: "/home/{{ sudo_user }}/{{ rke_dir }}/kube_config_cluster.yml"
+    dest: "/home/{{ sudo_user }}/.kube/config"

@@ -2,37 +2,52 @@
 # tasks file for helm_role
 
 - name: Debug
-  debug: "msg='Variable: {{ helm_download_url.split('/')[-1]  }}'"
+  debug: "msg='Variable: {{ helm_dir }}/{{ helm_download_url.split('.')[-3].split('-')[-2:] | join('-') | lower }}'"
   tags:
     - debug_info
 
 
-- name: Create target directory for helm packag
+- name: Create target directory for helm package
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
   file:
-    path: "{{ helm_dir }}"
+    path: "/home/{{ sudo_user }}/{{ helm_dir }}"
     state: directory
     mode: 0777
 
 - name: Download Helm package location
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
   get_url:
     url: "{{ helm_download_url }}"
-    dest: "{{ helm_dir }}/{{ helm_download_url.split('/')[-1] | lower }}"
+    dest: "/home/{{ sudo_user }}/{{ helm_dir }}/{{ helm_download_url.split('/')[-1] | lower }}"
     mode: '0755'
 
 - name: Untar helm package
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
   unarchive:
-    src: "{{ helm_dir }}/{{ helm_download_url.split('/')[-1] | lower }}"
+    src: "/home/{{ sudo_user }}/{{ helm_dir }}/{{ helm_download_url.split('/')[-1] | lower }}"
     dest: "{{ helm_dir }}"
 
 - name: Copy helm to executable location
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
   copy:
-    src: "{{ helm_dir }}/ {{ helm_download_url.split('.')[-3].split('-')[-2:].join('-') | lower }}"
+    src: "/home/{{ sudo_user }}/{{ helm_dir }}/{{ helm_download_url.split('.')[-3].split('-')[-2:] | join('-') | lower }}"
     dest: /usr/local/bin/helm
     mode: '0755'
 
 - name: Remove helm file
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
   file:
-    path: "{{ helm_dir }}/ {{ helm_download_url.split('.')[-3].split('-')[-2:].join('-') | lower }}"
+    path: "/home/{{ sudo_user }}/{{ helm_dir }}/{{ helm_download_url.split('.')[-3].split('-')[-2:] | join('-') | lower }}"
     state: absent
 
 - include_tasks: tiller.yml
