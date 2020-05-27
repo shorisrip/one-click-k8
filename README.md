@@ -27,7 +27,7 @@ The aim of this playbook is to deploy Kubernetes through Rancher on target VMs a
     - [rke] -> Node where rke and kubectl will be installed
 
 * ##### To customize the k8 deployment parameters 
-    - Copy the file ```roles/rke_role/vars/main.yml``` to pwd , edit and pass as variable file whilee running the playbook.
+    - Copy the file ```roles/rke_role/vars/main.yml``` to pwd , edit and pass as variable file while running the playbook.
 
 
 # Known limitations
