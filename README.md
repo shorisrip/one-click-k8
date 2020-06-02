@@ -15,7 +15,7 @@ On your local machine, or the ansible host machine:
 
 # About the playbook
 
-The aim of this playbook is to deploy Kubernetes through Rancher on target VMs and install Helm.
+The aim of this playbook is to deploy Kubernetes through Rancher on target VMs, install Helm, install Jenkins.
 To set up the VM inventory please change in ```hosts``` file. 
 [master] -> IPs of master node
 [worker] -> IPs of worker node
