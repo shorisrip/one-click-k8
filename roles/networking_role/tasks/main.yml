@@ -6,8 +6,22 @@
     value: '1'
     sysctl_set: yes
 
-- name: Stop firewalld
+- name: Install firewalld
+  yum:
+    name: firewalld
+    state: latest
+  ignore_errors: yes
+
+- name: Start firewalld
   service:
     name: firewalld
-    state: stopped
+    state: started
     enabled: False
+  ignore_errors: yes
+
+- name: Open require ports
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: disabled
+  with_items: "{{ firewall_ports }}"

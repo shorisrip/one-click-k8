@@ -4,7 +4,7 @@
   become: yes
   become_method: su
   become_user: "{{ sudo_user }}"
-  shell: kubectl -n kube-system create serviceaccount tiller
+  shell: kubectl create serviceaccount tiller -n kube-system
   register: result
   changed_when: "'created' in result.stdout"
   failed_when: "result.rc != 0 and 'already exists' not in result.stderr"
@@ -13,7 +13,7 @@
   become: yes
   become_method: su
   become_user: "{{ sudo_user }}"
-  shell: kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+  shell: kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
   register: result
   changed_when: "'created' in result.stdout"
   failed_when: "result.rc != 0 and 'already exists' not in result.stderr"
@@ -22,15 +22,15 @@
   become: yes
   become_method: su
   become_user: "{{ sudo_user }}"
-  shell: helm init --service-account tiller
+  shell: helm init --service-account tiller
 
-- name: Helm init
+- name: rollout tiller deploy
   become: yes
   become_method: su
   become_user: "{{ sudo_user }}"
-  shell: kubectl -n kube-system  rollout status deploy/tiller-deploy
+  shell: kubectl -n kube-system rollout status deploy/tiller-deploy
 
-- name: Helm init
+- name: patch tiller deployment
   become: yes
   become_method: su
   become_user: "{{ sudo_user }}"

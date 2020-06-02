@@ -26,6 +26,7 @@ To set up the VM inventory please change in ```hosts``` file.
 
 The VMs must already exist.
 The VMs must have same password.
+Firewall rules are common right now for master and worker nodes.
 
 
 # Usage
