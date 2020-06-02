@@ -3,7 +3,8 @@
 - hosts:
     - nodes
     - rke
-  name: play1
+    - jenkins
+  name: Play1 - Setup nonroot users and set DNS entries
   remote_user: root
   vars:
     sudoers:
@@ -11,9 +12,10 @@
     upassword: password
   roles:
     - user_setup_role
+    - dns_role
 
 - hosts: nodes
-  name:  Play2
+  name:  Play2 - Configure prerequisites in k8 nodes
   vars:
     resolv_nameservers:
       - 8.8.8.8
@@ -51,13 +53,12 @@
       - xt_statistic
       - xt_tcpudp
   roles:
-      - dns_role
       - docker_role
       - kernels_role
       - networking_role
 
 - hosts: rke
-  name: Play3
+  name: Play3 - Configure passwordless ssh from RKE to other nodes, install docker, rke and helm
   vars:
     sudo_user: ananya
     key_folder: /home/ananya/.ssh
@@ -68,3 +69,10 @@
       - ssh_keypair_role
       - rke_role
       - helm_role
+
+- hosts: jenkins
+  name: Play4 - Install Jenkins
+  vars:
+    sudo_user: ananya
+  roles:
+    - jenkins_role
