@@ -10,7 +10,7 @@
     resolv_nameservers:
       - 8.8.8.8
     sudoers:
-      - ananya
+      - techm
     upassword: password
   roles:
     - user_setup_role
@@ -19,7 +19,7 @@
 - hosts: nodes
   name:  Play2 - Configure prerequisites in k8 nodes
   vars:
-    sudo_user: ananya
+    sudo_user: techm
     kernel_modules_for_rke:
       - br_netfilter
       - ip6_udp_tunnel
@@ -74,8 +74,8 @@
 - hosts: rke
   name: Play3 - Configure passwordless ssh from RKE to other nodes, install docker, rke and helm
   vars:
-    sudo_user: ananya
-    key_folder: /home/ananya/.ssh
+    sudo_user: techm
+    key_folder: /home/techm/.ssh
     key_name: id_rsa
     ssh_password_of_nodes: my_password
   roles:
@@ -87,6 +87,6 @@
 #- hosts: jenkins
 #  name: Play4 - Install Jenkins
 #  vars:
-#    sudo_user: ananya
+#    sudo_user: techm
 #  roles:
 #    - jenkins_role

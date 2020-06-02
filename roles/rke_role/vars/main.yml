@@ -17,7 +17,7 @@ rke:
     plugin: calico
   authentication:
     strategy: x509
-  ssh_key_path: "/home/ananya/.ssh/id_rsa"
+  ssh_key_path: "/home/techm/.ssh/id_rsa"
   ssh_agent_auth: false
   authorization:
     mode: rbac

@@ -16,13 +16,13 @@ master
 worker
 
 [master:vars]
-user=ananya
-ssh_key_path=/home/ananya/.ssh/id_rsa
+user=techm
+ssh_key_path=/home/techm/.ssh/id_rsa
 port=22
 
 
 [worker:vars]
-user=ananya
-ssh_key_path=/home/ananya/.ssh/id_rsa
+user=techm
+ssh_key_path=/home/techm/.ssh/id_rsa
 port=22
 

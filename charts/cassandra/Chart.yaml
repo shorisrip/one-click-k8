@@ -13,7 +13,7 @@ keywords:
 - nosql
 maintainers:
 - email: DS00528024@techmahindra.com
-  name: TechMahindra
+  name: techmahindra
 name: cassandra
 sources:
 - ""
