@@ -1,5 +1,5 @@
 ---
-# tasks file for jenkins_role
+ tasks file for jenkins_role
 
 - name: Install JDKs
   yum:
@@ -40,6 +40,20 @@
     name: jenkins
     enabled: yes
 
+- name: Set HTTP port in Jenkins config.
+  lineinfile:
+    backrefs: true
+    dest: "{{ jenkins_init_file }}"
+    regexp: "^JENKINS_PORT="
+    line: "JENKINS_PORT={{ jenkins_http_port }}"
+
+- name: Restart jenkins service
+  become: yes
+  become_method: sudo
+  systemd:
+    name: jenkins
+    state: restarted
+
 - name: Install firewalld
   become: yes
   yum:
@@ -66,3 +80,4 @@
   systemd:
     name: firewalld
     state: reloaded
+
