@@ -1,2 +1,122 @@
 ---
 # tasks file for gitlab_role
+
+- name: Check if GitLab configuration file already exists.
+  become: yes
+  become_method: sudo
+  become_user: "{{ sudo_user }}"
+  stat: path=/etc/gitlab/gitlab.rb
+  register: gitlab_config_file
+
+- name: Check if GitLab is already installed.
+  become: yes
+  become_method: sudo
+  become_user: "{{ sudo_user }}"
+  stat: path=/usr/bin/gitlab-ctl
+  register: gitlab_file
+
+- name: Install gitlab's prerequisite packages
+  become: yes
+  become_method: sudo
+  become_user: "{{ sudo_user }}"
+  yum:
+    name:
+      - curl
+      - policycoreutils-python
+      - openssh-server
+    state: present
+
+
+- name: enable service sshd
+  become: yes
+  become_method: sudo
+  become_user: "{{ sudo_user }}"
+  systemd:
+    name: sshd
+    enabled: yes
+
+- name: Make sure a sshd is running
+  become: yes
+  become_method: sudo
+  become_user: "{{ sudo_user }}"
+  systemd:
+    state: started
+    name: sshd
+
+- name: Install firewalld
+  become: yes
+  yum:
+    name: firewalld
+    state: latest
+
+- name: Start firewalld
+  become: yes
+  service:
+    name: firewalld
+    state: started
+    enabled: False
+
+- name: Open require ports
+  become: yes
+  become_method: sudo
+  firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    state: enabled
+  with_items: "{{ firewall_ports }}"
+
+- name: reload service firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
+
+- name: Install postfix
+  become: yes
+  become_method: sudo
+  yum:
+    name:
+      - postfix
+    state: present
+
+- name: enable service postfix
+  become: yes
+  become_method: sudo
+  systemd:
+    name: postfix
+    enabled: yes
+
+- name: Make sure a postfix is running
+  become: yes
+  become_method: sudo
+  systemd:
+    state: started
+    name: postfix
+
+- name: Add the GitLab package repository
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
+  get_url:
+    url: "{{ gitlab_url }}"
+    dest: "/tmp/gitlab_install_repository.sh"
+    mode: "755"
+  when: not gitlab_file.stat.exists
+
+- name: Install GitLab repository.
+  command: bash /tmp/gitlab_install_repository.sh
+  register: output
+  when: not gitlab_file.stat.exists
+
+- name: Install Gitlab
+  become: yes
+  become_method: sudo
+  yum:
+    name:
+      - gitlab-ce
+    state: present
+
+- name: Reconfigure GitLab (first run).
+  command: >
+    gitlab-ctl reconfigure
+    creates=/var/opt/gitlab/bootstrapped
+  failed_when: false

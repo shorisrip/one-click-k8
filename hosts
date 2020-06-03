@@ -26,3 +26,9 @@ user=techm
 ssh_key_path=/home/techm/.ssh/id_rsa
 port=22
 
+
+[gitlab]
+172.21.109.74
+
+[nexus]
+172.21.109.73

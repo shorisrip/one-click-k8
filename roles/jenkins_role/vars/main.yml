@@ -2,3 +2,5 @@
 # vars file for jenkins_role
 
 jenkins_url: "http://pkg.jenkins.io/redhat-stable/jenkins.repo"
+firewall_ports:
+    - 8080/tcp

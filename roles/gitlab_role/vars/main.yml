@@ -1,2 +1,7 @@
 ---
 # vars file for gitlab_role
+
+firewall_ports:
+  - http
+  - https
+gitlab_url: "https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh"

@@ -23,5 +23,5 @@
   firewalld:
     port: "{{ item }}"
     permanent: yes
-    state: disabled
+    state: enabled
   with_items: "{{ firewall_ports }}"
