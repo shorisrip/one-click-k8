@@ -1,5 +1,5 @@
 - hosts:
-    - ananya
+    - techm
   name: play1
   become: true
   become_user:  kaermorhen
