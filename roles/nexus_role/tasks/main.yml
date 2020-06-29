@@ -1,2 +1,7 @@
 ---
 # tasks file for nexus_role
+
+#- include_tasks: nexus_in_k8.yml
+
+- include_tasks: nexus_in_vm.yml
+

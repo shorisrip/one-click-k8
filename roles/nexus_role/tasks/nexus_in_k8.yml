@@ -1,0 +1,152 @@
+---
+
+- name: Install EPEL repo
+  yum:
+     name: epel-release
+     state: present
+
+- name: Install the latest version of pip
+  shell:
+    cmd: "{{ item }}"
+  with_items:
+    - "pip install --upgrade pip"
+    - "pip install --upgrade setuptools"
+
+- name: Install openshift client for ansible k8 module
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
+  pip:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - setuptools
+    - openshift
+
+
+- name: Create a k8s namespace
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
+  k8s:
+    name: "{{ nexus_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Create a PV object from definition
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: "{{ nexus_pv_name }}"
+        labels:
+          type: local
+      spec:
+        storageClassName: manual
+        capacity:
+          storage: "{{ nexus_pv_storage_size }}"
+        accessModes:
+          - ReadWriteOnce
+        hostPath:
+          path: "/home/{{ sudo_user }}/{{ nexus_pv_path }}"
+
+
+- name: Create a PVC object from definition
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: "{{ nexus_pvc_name }}"
+        namespace: "{{ nexus_namespace }}"
+      spec:
+        storageClassName: manual
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: "{{ nexus_pv_storage_size }}"
+
+
+- name: Create a Deployment object from definition
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
+  k8s:
+    state: present
+    definition:
+      apiVersion: extensions/v1beta1
+      kind: Deployment
+      metadata:
+        name: "{{ nexus_deployment_name }}"
+        namespace: "{{ nexus_namespace }}"
+      spec:
+        replicas: "{{ nexus_deployment_replica }}"
+        template:
+          metadata:
+            labels:
+              app: "{{ nexus_deployment_label_app }}"
+          spec:
+            containers:
+              - name: "{{ nexus_deployment_name }}"
+                image: "{{ nexus_container_image }}"
+                resources:
+                  limits:
+                    memory: "4Gi"
+                    cpu: "1000m"
+                  requests:
+                    memory: "2Gi"
+                    cpu: "500m"
+                ports:
+                  - containerPort: "{{ nexus_container_port }}"
+                volumeMounts:
+                  - name: "{{ nexus_volumeMount_name }}"
+                    mountPath: "/home/{{ sudo_user }}/{{ nexus_volumeMount_name }}"
+
+            volumes:
+              - name: "{{ nexus_volumeMount_name }}"
+                persistentVolumeClaim:
+                  claimName: "{{ nexus_pvc_name }}"
+
+- name: Create a Service object from definition
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ nexus_service_name }}"
+        namespace: "{{ nexus_namespace }}"
+        annotations:
+          prometheus.io/scrape: 'true'
+          prometheus.io/path:   /
+          prometheus.io/port:   '8081'
+      spec:
+        selector:
+          app: "{{ nexus_deployment_label_app }}"
+        type: NodePort
+        ports:
+          - port: "{{ nexus_container_port }}"
+            targetPort: "{{ nexus_container_port }}"
+            nodePort: "{{ nexus_nodePort }}"
+
+- name: Display password
+  become: yes
+  become_method: su
+  become_user: "{{ sudo_user }}"
+  shell:
+    cmd: "kubectl exec -it $(kubectl get pods -n {{ nexus_namespace }} | grep nexus- | grep Running | awk 'FNR <= 1' | awk '{print $1;}') cat {{ nexus_volumeMount_name }}/admin.password  -n {{ nexus_namespace }}"
+  register: nexus_pass

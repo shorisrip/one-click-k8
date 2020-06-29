@@ -190,9 +190,9 @@ jvm:
 ##
 dbUser:
   user: root
-  pwd: techm@1234
+  pwd: ananya@1234
   #forcePassword: false
-  #  password: "techm@1234"
+  #  password: "ananya@1234"
   # existingSecret:
 
 ## ConfigMap with cql scripts. Useful for creating a keyspace

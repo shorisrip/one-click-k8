@@ -1,2 +1,15 @@
 ---
 # handlers file for nexus_role
+
+
+- name: Start nexus
+  become: true
+  service:
+    name: nexus
+    state: started
+
+- name: Restart nexus
+  become: true
+  service:
+    name: nexus
+    state: restarted

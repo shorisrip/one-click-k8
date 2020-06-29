@@ -14,7 +14,7 @@
   failed_when: false
   changed_when: false
 
-- name: Install resolv.conf
+- name: Generate resolv.conf
   template:
     src: resolv.conf.j2
     dest: /etc/resolv.conf

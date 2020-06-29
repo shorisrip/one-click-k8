@@ -3,8 +3,11 @@
 
 - name: Install EPEL repo
   yum:
-     name: epel-release
+     name: "{{ item }}"
      state: present
+  with_items:
+    - epel-release
+    - net-tools
 
 - name: Install the latest version of pip
   yum:

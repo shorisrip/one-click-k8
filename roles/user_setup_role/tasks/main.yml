@@ -7,6 +7,7 @@
     state: present
 
 - name: Allow 'wheel' group to have passwordless sudo
+  become: yes
   lineinfile:
     dest: /etc/sudoers
     state: present
@@ -15,6 +16,7 @@
     validate: visudo -cf %s
 
 - name: Creating non root users
+  become: yes
   user:
     name: "{{ item }}"
     password: "{{ upassword | password_hash('sha512') }}"
@@ -22,6 +24,7 @@
   with_items: "{{ sudoers }}"
 
 - name: Add sudoers users to wheel group
+  become: yes
   user:
     name: "{{ item }}"
     groups: wheel

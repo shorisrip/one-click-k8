@@ -1,7 +1,7 @@
 --- 
 env: 
   db: test_db
-  password: techm$1234
+  password: ananya$1234
 metadata: 
   namespace: default
 service: 

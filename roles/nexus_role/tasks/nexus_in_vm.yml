@@ -1,0 +1,138 @@
+---
+
+- name: upgrade all packages
+  become: yes
+  yum:
+    name: '*'
+    state: latest
+
+- name: Install JDKs
+  become: yes
+  yum:
+    name:
+      - java-1.8.0-openjdk-devel
+      - java-1.8.0-openjdk
+    state: present
+
+- name: Install wget
+  become: yes
+  yum:
+    name: wget
+    state: installed
+
+- name: Install createrepo for nexus-yum-repository-plugin
+  become: yes
+  yum:
+    name: createrepo
+    state: installed
+
+- name: Create Nexus group
+  group:
+    name: "{{ nexus_os_group }}"
+    state:  present
+  become: true
+
+- name: Create Nexus user
+  user:
+    name: "{{ nexus_os_user }}"
+    group: "{{ nexus_os_group }}"
+    state: present
+  become: true
+
+- name: Create Nexus installation directory
+  file:
+    path: "{{ nexus_installation_dir }}"
+    state: directory
+  become: true
+
+- name: Download Nexus package
+  become: true
+  get_url:
+    url: "https://download.sonatype.com/nexus/3/{{ nexus_package }}"
+    dest: "{{ nexus_download_dir }}/{{ nexus_package }}"
+#  become: false
+
+
+- name: Unpack Nexus package
+  become: true
+#  become: yes
+#  become_method: su
+#  become_user: "{{ sudo_user }}"
+  unarchive:
+    src: "{{ nexus_download_dir }}/{{ nexus_package }}"
+    dest: "{{ nexus_installation_dir }}"
+    owner: "{{ nexus_os_user }}"
+    group: "{{ nexus_os_group }}"
+    mode: 0755
+    remote_src: yes
+
+- name: Change ownership of unpacked files
+  become: true
+  file:
+    path: "{{ item }}"
+    owner: "{{ nexus_os_user }}"
+    group: "{{ nexus_os_user }}"
+    mode: '0755'
+    recurse: yes
+  with_items:
+    - "{{ nexus_installation_dir }}/nexus-{{ nexus_version }}"
+    - "{{ nexus_installation_dir }}/sonatype-work"
+
+
+- name: Create symlink to init.d
+  become: true
+#  become: yes
+#  become_method: su
+#  become_user: "{{ sudo_user }}"
+  file:
+    src: "{{ nexus_installation_dir }}/nexus-{{ nexus_version }}/bin/nexus"
+    dest: "/etc/init.d/nexus"
+    owner: "{{ nexus_os_user }}"
+    group: "{{ nexus_os_group }}"
+    state: link
+
+- name: Configure run_as_user in nexus.rc
+  become: true
+  lineinfile:
+    dest: "{{ nexus_installation_dir }}/nexus-{{ nexus_version }}/bin/nexus.rc"
+    line: 'run_as_user={{ nexus_os_user }}'
+    regexp: 'run_as_user=.*'
+    state: present
+
+
+- name: Register service with chkconfig system
+  become: true
+  service:
+    name: nexus
+    enabled: yes
+  notify:
+      - 'Restart nexus'
+
+
+- name: Install firewalld
+  become: yes
+  yum:
+    name: firewalld
+    state: latest
+
+- name: Start firewalld
+  become: yes
+  service:
+    name: firewalld
+    state: started
+    enabled: False
+
+- name: Open require ports
+  become: yes
+  become_method: sudo
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+  with_items: "{{ firewall_ports }}"
+
+- name: reload service firewalld
+  become: yes
+  systemd:
+    name: firewalld
+    state: reloaded

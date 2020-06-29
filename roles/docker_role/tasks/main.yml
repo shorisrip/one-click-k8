@@ -24,7 +24,7 @@
       - docker-ce
   become: yes
 
-- name: Install yum utils
+- name: Install yum utils package
   yum:
     name: yum-utils
     state: latest
@@ -74,3 +74,10 @@
     append: yes
   with_items: "{{ sudo_user }}"
   become: yes
+
+- name: Restart docker service
+  become: yes
+  become_method: sudo
+  systemd:
+    name: docker
+    state: restarted

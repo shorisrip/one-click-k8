@@ -1,2 +1,4 @@
 ---
 # tasks file for mariadb_role
+
+- include_tasks: mariadb_in_k8.yml

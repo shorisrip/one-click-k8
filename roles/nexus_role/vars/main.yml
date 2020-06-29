@@ -1,2 +1,33 @@
 ---
 # vars file for nexus_role
+
+nexus_version: "3.23.0-03"
+nexus_download_dir: '/opt'
+nexus_package: 'nexus-{{ nexus_version }}-unix.tar.gz'
+nexus_installation_dir: '/opt'
+nexus_working_dir: '/var/nexus'
+nexus_port: 8081
+nexus_os_user: 'ec2-user'
+nexus_os_group: 'ec2-user'
+firewall_ports: '{{ nexus_port }}/tcp'
+
+
+#nexus_namespace: 'netops-ai'
+#
+#nexus_pv_name: 'nexus-persistent-volume'
+#nexus_pv_storage_size: '200Gi'
+#nexus_pv_path: "nexus_data_pv"
+#
+#nexus_pvc_name: 'nexus-persistent-volume-claim'
+#
+#nexus_deployment_name: 'nexus'
+#nexus_deployment_replica : 1
+#nexus_deployment_label_app: 'nexus-server'
+#
+#nexus_container_image: 'sonatype/nexus3:latest'
+#nexus_container_port: 8081
+#nexus_volumeMount_name: 'nexus-data'
+#
+#nexus_service_name: 'nexus-service'
+#
+#nexus_nodePort: 32001

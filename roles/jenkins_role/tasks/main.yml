@@ -2,9 +2,6 @@
 # tasks file for jenkins_role
 
 - name: Install JDKs
-  become: yes
-  become_method: sudo
-  become_user: "{{ sudo_user }}"
   yum:
     name:
       - java-1.8.0-openjdk-devel
@@ -12,26 +9,19 @@
     state: present
 
 - name: Download jenkins repo & save it in local
-  become: yes
-  become_method: sudo
-  become_user: "{{ sudo_user }}"
   get_url:
     url: "{{ jenkins_url }}"
-    dest: /etc/yum.repos.d/jenkins.repo
+    dest: "/etc/yum.repos.d/jenkins.repo"
     mode: "755"
 
 - name: Import key to access repo locally
-  become: yes
-  become_method: sudo
-  become_user: "{{ sudo_user }}"
   rpm_key:
-  state: present
-  key: http://pkg.jenkins.io/redhat-stable/jenkins.io.key
+    state: present
+    key: "http://pkg.jenkins.io/redhat-stable/jenkins.io.key"
 
 - name: Install Jenkins
   become: yes
   become_method: sudo
-  become_user: "{{ sudo_user }}"
   yum:
     name:
       - jenkins
@@ -39,7 +29,6 @@
 - name: Restart jenkins service
   become: yes
   become_method: sudo
-  become_user: "{{ sudo_user }}"
   systemd:
     name: jenkins
     state: restarted
@@ -47,7 +36,48 @@
 - name: Enable jenkins service
   become: yes
   become_method: sudo
-  become_user: "{{ sudo_user }}"
   systemd:
     name: jenkins
     enabled: yes
+
+- name: Set HTTP port in Jenkins config.
+  lineinfile:
+    backrefs: true
+    dest: "{{ jenkins_init_file }}"
+    regexp: "^JENKINS_PORT="
+    line: "JENKINS_PORT={{ jenkins_http_port }}"
+
+- name: Restart jenkins service
+  become: yes
+  become_method: sudo
+  systemd:
+    name: jenkins
+    state: restarted
+
+- name: Install firewalld
+  become: yes
+  yum:
+    name: firewalld
+    state: latest
+
+- name: Start firewalld
+  become: yes
+  service:
+    name: firewalld
+    state: started
+    enabled: False
+
+- name: Open require ports
+  become: yes
+  become_method: sudo
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+  with_items: "{{ firewall_ports }}"
+
+- name: reload service firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
+
